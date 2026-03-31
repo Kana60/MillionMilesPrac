@@ -9,6 +9,5 @@ services:
   - type: cron
     name: encar-daily-update
     runtime: docker
-    plan: free
     schedule: "0 3 * * *"
     dockerCommand: "python -m app.cron_update"
