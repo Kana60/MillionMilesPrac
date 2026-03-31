@@ -1,0 +1,22 @@
+name: Daily Encar Update
+
+on:
+  schedule:
+    - cron: "7 0 * * *" # daily at 00:07 UTC
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger /api/cron/update-cars
+        run: |
+          set -e
+          URL="https://encar-catalog.onrender.com/api/cron/update-cars"
+          echo "POST $URL"
+          code=$(curl -sS -o response.json -w "%{http_code}" -X POST "$URL")
+          echo "HTTP $code"
+          cat response.json
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            exit 1
+          fi
