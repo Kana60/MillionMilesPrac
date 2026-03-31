@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: encar-catalog
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+
+jobs:
+  - type: cron
+    name: encar-daily-update
+    env: docker
+    schedule: "0 3 * * *"
+    command: "python -m app.cron_update"

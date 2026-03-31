@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Premium Cars from Encar</title>
+
+    <link rel="icon" type="image/jpeg" href="/static/channels4_profile.jpg" />
+    <link rel="apple-touch-icon" href="/static/channels4_profile.jpg" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            boxShadow: {
+              soft: "0 18px 55px rgba(0,0,0,0.45)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      html, body { overflow-x: hidden; }
+      .glass { backdrop-filter: blur(10px); background: rgba(17, 24, 39, 0.55); }
+      .hero-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 50%;
+        opacity: 0.28;
+        filter: saturate(1.05) contrast(1.05);
+      }
+      @media (max-width: 639px) {
+        .hero-video {
+          object-position: 50% 70%;
+          transform: translateY(14px) scale(1.02);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero-video { display: none; }
+      }
+
+      #filters .filters-body {
+        overflow: hidden;
+        max-height: 1600px;
+        transition: max-height 260ms ease, opacity 200ms ease;
+        opacity: 1;
+      }
+      #filters[data-collapsed="1"] .filters-body {
+        max-height: 0px;
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (min-width: 640px) {
+        #filters .filters-body {
+          max-height: none;
+          opacity: 1;
+          pointer-events: auto;
+        }
+        #filters[data-collapsed="1"] .filters-body {
+          max-height: none;
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+      #filters .filter-control {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.04);
+        color: rgb(244, 244, 245);
+        padding: 12px 14px;
+        font-size: 14px;
+        line-height: 20px;
+        outline: none;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+      #filters .filter-control::placeholder {
+        color: rgb(113, 113, 122);
+      }
+      #filters .filter-control:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+      #filters .filter-control:focus {
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.10) inset,
+          0 0 0 4px rgba(255, 255, 255, 0.08);
+      }
+      #filters .filter-control:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      #filters .select-wrap { position: relative; }
+      #filters .select-wrap[data-open="1"] { z-index: 45; }
+      #filters .select-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        text-align: left;
+      }
+      #filters .select-btn .chev {
+        flex: 0 0 auto;
+        opacity: 0.8;
+      }
+      #filters .select-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        z-index: 40;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(9, 9, 11, 0.96);
+        box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+        overflow: hidden;
+        display: none;
+      }
+      #filters .select-wrap[data-open="1"] .select-menu { display: block; }
+      #filters .select-list {
+        max-height: 420px;
+        overflow: auto;
+        padding: 6px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(244, 244, 245, 0.28) rgba(255, 255, 255, 0.06);
+      }
+      #filters .select-list::-webkit-scrollbar { width: 10px; }
+      #filters .select-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+      }
+      #filters .select-list::-webkit-scrollbar-thumb {
+        background: rgba(244, 244, 245, 0.28);
+        border-radius: 999px;
+        border: 2px solid rgba(9, 9, 11, 0.96);
+      }
+      #filters .select-list::-webkit-scrollbar-thumb:hover { background: rgba(244, 244, 245, 0.40); }
+      #filters .select-item {
+        width: 100%;
+        border-radius: 12px;
+        padding: 10px 10px;
+        font-size: 14px;
+        line-height: 18px;
+        color: rgb(244, 244, 245);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        text-align: left;
+        transition: background-color 120ms ease;
+      }
+      #filters .select-item:hover { background: rgba(255, 255, 255, 0.08); }
+      #filters .select-item[aria-selected="true"] { background: rgba(255, 255, 255, 0.12); }
+      #filters .select-item.is-placeholder { color: rgb(161, 161, 170); }
+    </style>
+
+    <script>
+      let _visibleLimit = 16;
+      const _visibleStep = 16;
+
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      function ensureTopOnFreshLoad() {
+        if (window.location.hash) return;
+        try {
+          window.scrollTo(0, 0);
+        } catch (e) {}
+      }
+
+      window.addEventListener('pageshow', ensureTopOnFreshLoad);
+
+      function showToast(message, type = 'info') {
+        const root = document.getElementById('toastRoot');
+        if (!root) return;
+
+        const el = document.createElement('div');
+        const base = 'rounded-2xl border px-5 py-4 text-base shadow-soft backdrop-blur cursor-pointer';
+        const colors = {
+          info: 'border-white/15 bg-zinc-950/80 text-zinc-100',
+          success: 'border-emerald-400/30 bg-emerald-950/70 text-emerald-50',
+          warn: 'border-amber-400/30 bg-amber-950/70 text-amber-50',
+          error: 'border-red-400/30 bg-red-950/70 text-red-50',
+        };
+        el.className = base + ' ' + (colors[type] || colors.info);
+        el.textContent = message;
+        el.addEventListener('click', () => el.remove());
+        root.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(-4px)';
+          el.style.transition = 'opacity 200ms ease, transform 200ms ease';
+          setTimeout(() => el.remove(), 240);
+        }, 5200);
+      }
+
+      async function updateCars() {
+        const btn = document.getElementById('updateCarsBtn');
+        if (!btn) return;
+        const prev = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = 'Updating...';
+        try {
+          const res = await fetch('/api/update-cars?force=1', { method: 'POST' });
+          let payload = null;
+          try { payload = await res.json(); } catch (e) { payload = null; }
+          if (!res.ok || (payload && payload.ok === false)) {
+            const msg = (payload && payload.error) ? payload.error : ('HTTP ' + res.status);
+            throw new Error(msg);
+          }
+          if (payload && payload.skipped === true) {
+            showToast('Уже обновлено за последние 24 часа.', 'warn');
+            return;
+          }
+          showToast('Обновлено. Перезагружаю каталог...', 'success');
+          window.location.reload();
+        } catch (e) {
+          showToast('Ошибка обновления: ' + (e && e.message ? e.message : ''), 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerText = prev;
+        }
+      }
+
+      function _norm(s) {
+        return (s || '').toString().trim().toLowerCase();
+      }
+
+      function applyFilters() {
+        const q = _norm(document.getElementById('q')?.value);
+        const make = _norm(document.getElementById('make')?.value);
+        const model = _norm(document.getElementById('model')?.value);
+        const yearFrom = parseInt(document.getElementById('yearFrom')?.value || '0', 10) || 0;
+        const yearTo = parseInt(document.getElementById('yearTo')?.value || '0', 10) || 0;
+        const priceFrom = parseInt(document.getElementById('priceFrom')?.value || '0', 10) || 0;
+        const priceTo = parseInt(document.getElementById('priceTo')?.value || '0', 10) || 0;
+        const mileageFrom = parseInt(document.getElementById('mileageFrom')?.value || '0', 10) || 0;
+        const mileageTo = parseInt(document.getElementById('mileageTo')?.value || '0', 10) || 0;
+        const sort = (document.getElementById('sort')?.value || '').toString();
+
+        const cards = Array.from(document.querySelectorAll('[data-car-card="1"]'));
+        let visible = 0;
+
+        for (const el of cards) {
+          const elMake = _norm(el.getAttribute('data-make'));
+          const elModel = _norm(el.getAttribute('data-model'));
+          const elYear = parseInt(el.getAttribute('data-year') || '0', 10) || 0;
+          const elPrice = parseInt(el.getAttribute('data-price') || '0', 10) || 0;
+          const elMileage = parseInt(el.getAttribute('data-mileage') || '0', 10) || 0;
+
+          const title = _norm(`${elMake} ${elModel}`);
+
+          let ok = true;
+          if (make && elMake !== make) ok = false;
+          if (model && elModel !== model) ok = false;
+          if (yearFrom && elYear && elYear < yearFrom) ok = false;
+          if (yearTo && elYear && elYear > yearTo) ok = false;
+          if (priceFrom && elPrice && elPrice < priceFrom) ok = false;
+          if (priceTo && elPrice && elPrice > priceTo) ok = false;
+          if (mileageFrom && elMileage && elMileage < mileageFrom) ok = false;
+          if (mileageTo && elMileage && elMileage > mileageTo) ok = false;
+          if (q && !title.includes(q)) ok = false;
+
+          el.dataset._filterOk = ok ? '1' : '0';
+        }
+
+        const okCards = cards.filter((c) => c.dataset._filterOk === '1');
+        visible = okCards.length;
+
+        // Apply sorting to all cards (so Load More shows correctly ordered subset).
+        const grid = document.querySelector('#cars [data-cards-grid="1"]');
+        if (grid && sort) {
+          const sorted = cards.slice().sort((a, b) => {
+            const ay = parseInt(a.getAttribute('data-year') || '0', 10) || 0;
+            const by = parseInt(b.getAttribute('data-year') || '0', 10) || 0;
+            const ap = parseInt(a.getAttribute('data-price') || '0', 10) || 0;
+            const bp = parseInt(b.getAttribute('data-price') || '0', 10) || 0;
+            const am = parseInt(a.getAttribute('data-mileage') || '0', 10) || 0;
+            const bm = parseInt(b.getAttribute('data-mileage') || '0', 10) || 0;
+
+            if (sort === 'priceAsc') return ap - bp;
+            if (sort === 'priceDesc') return bp - ap;
+            if (sort === 'yearDesc') return by - ay;
+            if (sort === 'yearAsc') return ay - by;
+            if (sort === 'mileageAsc') return am - bm;
+            if (sort === 'mileageDesc') return bm - am;
+            return 0;
+          });
+          for (const el of sorted) grid.appendChild(el);
+        }
+
+        // Apply Load More visibility
+        let shown = 0;
+        for (const el of cards) {
+          const ok = el.dataset._filterOk === '1';
+          if (!ok) {
+            el.style.display = 'none';
+            continue;
+          }
+          shown += 1;
+          el.style.display = shown <= _visibleLimit ? '' : 'none';
+        }
+
+        const moreBtn = document.getElementById('loadMoreBtn');
+        const moreWrap = document.getElementById('loadMoreWrap');
+        if (moreWrap && moreBtn) {
+          const canMore = visible > _visibleLimit;
+          moreWrap.style.display = canMore ? '' : 'none';
+          const remaining = Math.max(visible - Math.min(visible, _visibleLimit), 0);
+          moreBtn.innerText = remaining > 0 ? `Показать ещё (${remaining})` : 'Показать ещё';
+        }
+
+        const countEl = document.getElementById('visibleCount');
+        if (countEl) countEl.innerText = String(visible);
+      }
+
+      function initFilters() {
+        const cards = Array.from(document.querySelectorAll('[data-car-card="1"]'));
+        const makes = new Set();
+        const modelsByMake = new Map();
+        const years = new Set();
+
+        for (const el of cards) {
+          const m = (el.getAttribute('data-make') || '').trim();
+          const md = (el.getAttribute('data-model') || '').trim();
+          const y = parseInt(el.getAttribute('data-year') || '0', 10) || 0;
+          if (m) makes.add(m);
+          if (m && md) {
+            if (!modelsByMake.has(m)) modelsByMake.set(m, new Set());
+            modelsByMake.get(m).add(md);
+          }
+          if (y) years.add(y);
+        }
+
+        const makeSelect = document.getElementById('make');
+        const modelSelect = document.getElementById('model');
+        const yearFromSelect = document.getElementById('yearFrom');
+        const yearToSelect = document.getElementById('yearTo');
+        const sortSelect = document.getElementById('sort');
+
+        function enhanceSelect(selectId) {
+          const sel = document.getElementById(selectId);
+          const wrap = document.querySelector(`#filters [data-select-id="${selectId}"]`);
+          if (!sel || !wrap) return;
+
+          const btn = wrap.querySelector('[data-select-btn]');
+          const valueEl = wrap.querySelector('[data-select-value]');
+          const list = wrap.querySelector('[data-select-list]');
+          if (!btn || !valueEl || !list) return;
+
+          function close() {
+            wrap.dataset.open = '0';
+          }
+
+          function open() {
+            if (btn.disabled) return;
+            for (const el of document.querySelectorAll('#filters .select-wrap[data-open="1"]')) {
+              if (el !== wrap) el.dataset.open = '0';
+            }
+            wrap.dataset.open = '1';
+          }
+
+          function toggle() {
+            if (wrap.dataset.open === '1') close();
+            else open();
+          }
+
+          function syncFromSelect() {
+            const opts = Array.from(sel.options || []);
+            list.innerHTML = '';
+
+            for (const opt of opts) {
+              const item = document.createElement('button');
+              item.type = 'button';
+              item.className = 'select-item' + (opt.value === '' ? ' is-placeholder' : '');
+              item.textContent = opt.textContent || '';
+              item.dataset.value = opt.value;
+              item.setAttribute('aria-selected', opt.selected ? 'true' : 'false');
+              item.addEventListener('click', () => {
+                sel.value = opt.value;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                close();
+              });
+              list.appendChild(item);
+            }
+
+            const selectedOpt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+            const label = selectedOpt ? (selectedOpt.textContent || '') : '';
+            valueEl.textContent = label || '';
+            btn.disabled = !!sel.disabled;
+          }
+
+          btn.addEventListener('click', toggle);
+          sel.addEventListener('change', syncFromSelect);
+          document.addEventListener('click', (e) => {
+            if (!wrap.contains(e.target)) close();
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+          });
+
+          syncFromSelect();
+          return { syncFromSelect, close };
+        }
+
+        const enhanced = {
+          make: enhanceSelect('make'),
+          model: enhanceSelect('model'),
+          yearFrom: enhanceSelect('yearFrom'),
+          yearTo: enhanceSelect('yearTo'),
+          sort: enhanceSelect('sort'),
+        };
+
+        function fillSelect(sel, values, placeholder) {
+          if (!sel) return;
+          sel.innerHTML = '';
+          const opt0 = document.createElement('option');
+          opt0.value = '';
+          opt0.textContent = placeholder;
+          sel.appendChild(opt0);
+          for (const v of values) {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            sel.appendChild(opt);
+          }
+
+          if (sel.id && enhanced[sel.id] && enhanced[sel.id].syncFromSelect) {
+            enhanced[sel.id].syncFromSelect();
+          }
+        }
+
+        function setModelDisabled(disabled) {
+          if (!modelSelect) return;
+          modelSelect.disabled = disabled;
+          modelSelect.classList.toggle('opacity-60', disabled);
+          modelSelect.classList.toggle('cursor-not-allowed', disabled);
+          if (enhanced.model && enhanced.model.syncFromSelect) enhanced.model.syncFromSelect();
+        }
+
+        function updateModelOptions() {
+          if (!modelSelect || !makeSelect) return;
+          const selectedMake = (makeSelect.value || '').trim();
+          modelSelect.value = '';
+          if (!selectedMake) {
+            fillSelect(modelSelect, [], 'Модель');
+            setModelDisabled(true);
+            return;
+          }
+          const set = modelsByMake.get(selectedMake);
+          const arr = set ? Array.from(set).sort((a, b) => a.localeCompare(b)) : [];
+          fillSelect(modelSelect, arr, 'Модель');
+          setModelDisabled(false);
+        }
+
+        const makesArr = Array.from(makes).sort((a, b) => a.localeCompare(b));
+        const yearsArr = Array.from(years).sort((a, b) => a - b);
+
+        fillSelect(makeSelect, makesArr, 'Марка');
+        fillSelect(modelSelect, [], 'Модель');
+        setModelDisabled(true);
+        fillSelect(yearFromSelect, yearsArr, 'Год от');
+        fillSelect(yearToSelect, yearsArr, 'Год до');
+
+        if (sortSelect) {
+          sortSelect.innerHTML = '';
+          for (const it of [
+            { v: '', t: 'Сортировка' },
+            { v: 'priceAsc', t: 'Цена: дешевле' },
+            { v: 'priceDesc', t: 'Цена: дороже' },
+            { v: 'yearDesc', t: 'Год: новее' },
+            { v: 'yearAsc', t: 'Год: старее' },
+            { v: 'mileageAsc', t: 'Пробег: меньше' },
+            { v: 'mileageDesc', t: 'Пробег: больше' },
+          ]) {
+            const opt = document.createElement('option');
+            opt.value = it.v;
+            opt.textContent = it.t;
+            sortSelect.appendChild(opt);
+          }
+        }
+
+        const handler = () => {
+          _visibleLimit = 16;
+          applyFilters();
+        };
+        document.getElementById('q')?.addEventListener('input', handler);
+        makeSelect?.addEventListener('change', () => {
+          updateModelOptions();
+          _visibleLimit = 16;
+          applyFilters();
+        });
+        modelSelect?.addEventListener('change', handler);
+        yearFromSelect?.addEventListener('change', handler);
+        yearToSelect?.addEventListener('change', handler);
+        document.getElementById('priceFrom')?.addEventListener('input', handler);
+        document.getElementById('priceTo')?.addEventListener('input', handler);
+        document.getElementById('mileageFrom')?.addEventListener('input', handler);
+        document.getElementById('mileageTo')?.addEventListener('input', handler);
+        sortSelect?.addEventListener('change', handler);
+
+        document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
+          _visibleLimit += _visibleStep;
+          applyFilters();
+        });
+
+        document.getElementById('resetBtn')?.addEventListener('click', () => {
+          if (document.getElementById('q')) document.getElementById('q').value = '';
+          if (makeSelect) makeSelect.value = '';
+          if (modelSelect) modelSelect.value = '';
+          if (yearFromSelect) yearFromSelect.value = '';
+          if (yearToSelect) yearToSelect.value = '';
+          if (document.getElementById('priceFrom')) document.getElementById('priceFrom').value = '';
+          if (document.getElementById('priceTo')) document.getElementById('priceTo').value = '';
+          if (document.getElementById('mileageFrom')) document.getElementById('mileageFrom').value = '';
+          if (document.getElementById('mileageTo')) document.getElementById('mileageTo').value = '';
+          if (sortSelect) sortSelect.value = '';
+          _visibleLimit = 16;
+          updateModelOptions();
+          applyFilters();
+        });
+
+        updateModelOptions();
+        applyFilters();
+      }
+
+      function setupSmoothScroll() {
+        const trigger = document.getElementById('scrollToCars');
+        const target = document.getElementById('cars');
+        if (!trigger || !target) return;
+
+        function easeInCubic(t) {
+          return t * t * t;
+        }
+
+        function smoothScrollToY(y, durationMs = 650) {
+          const start = window.scrollY || window.pageYOffset || 0;
+          const delta = y - start;
+          const startTime = performance.now();
+
+          function tick(now) {
+            const elapsed = now - startTime;
+            const t = Math.min(1, Math.max(0, elapsed / durationMs));
+            const k = easeInCubic(t);
+            window.scrollTo(0, start + delta * k);
+            if (t < 1) requestAnimationFrame(tick);
+          }
+
+          requestAnimationFrame(tick);
+        }
+
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          const y = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0);
+          smoothScrollToY(y, 700);
+        });
+      }
+
+      function setupHeroVideoLoop() {
+        const v = document.getElementById('heroVideo');
+        if (!v) return;
+
+        // Enforce required properties for autoplay on mobile browsers.
+        v.muted = true;
+        v.loop = true;
+        v.playsInline = true;
+
+        // Fallback for cases where 'loop' is ignored or playback stops.
+        v.addEventListener('ended', () => {
+          try {
+            v.currentTime = 0;
+            const p = v.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } catch (e) {}
+        });
+
+        // Try to start playback once metadata is ready.
+        v.addEventListener('loadeddata', () => {
+          try {
+            const p = v.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } catch (e) {}
+        }, { once: true });
+      }
+
+      function setupMobileFiltersToggle() {
+        const filters = document.getElementById('filters');
+        const btn = document.getElementById('filtersToggleBtn');
+        const label = document.getElementById('filtersToggleLabel');
+        if (!filters || !btn) return;
+
+        function isMobile() {
+          return window.matchMedia && window.matchMedia('(max-width: 639px)').matches;
+        }
+
+        function setCollapsed(collapsed) {
+          filters.dataset.collapsed = collapsed ? '1' : '0';
+          if (label) label.textContent = collapsed ? 'Показать фильтры' : 'Скрыть фильтры';
+          btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        }
+
+        if (filters.dataset.collapsed !== '0' && filters.dataset.collapsed !== '1') {
+          setCollapsed(isMobile());
+        } else {
+          setCollapsed(filters.dataset.collapsed === '1');
+        }
+
+        btn.addEventListener('click', () => {
+          const collapsed = (filters.dataset.collapsed || '0') === '1';
+          setCollapsed(!collapsed);
+        });
+
+        window.addEventListener('resize', () => {
+          if (!isMobile()) setCollapsed(false);
+        });
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        initFilters();
+        setupSmoothScroll();
+        setupHeroVideoLoop();
+        setupMobileFiltersToggle();
+      });
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-100 selection:bg-white/20">
+    <div id="toastRoot" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[92vw] sm:w-[420px]"></div>
+    <header class="relative overflow-visible">
+      <div class="pointer-events-none absolute inset-0">
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full bg-white/5 blur-3xl"></div>
+        <div class="absolute -top-40 -left-40 h-[420px] w-[420px] rounded-full bg-indigo-500/10 blur-3xl"></div>
+        <div class="absolute -top-32 -right-48 h-[520px] w-[520px] rounded-full bg-emerald-500/10 blur-3xl"></div>
+      </div>
+
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/10 grid place-items-center shadow-soft">
+            <span class="text-sm font-semibold tracking-wide">EC</span>
+          </div>
+          <div>
+            <div class="text-xs tracking-[0.2em] uppercase text-zinc-400">Catalog</div>
+            <div class="font-semibold tracking-tight">Encar Premium</div>
+          </div>
+        </div>
+        <button
+          id="updateCarsBtn"
+          class="inline-flex items-center gap-2 rounded-xl bg-white text-zinc-950 px-4 py-2 text-sm font-semibold hover:bg-zinc-200 transition disabled:opacity-60 shadow-soft"
+          type="button"
+          onclick="updateCars()"
+        >
+          Update Cars
+        </button>
+      </div>
+
+      <section class="mt-10">
+        <div class="relative rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 shadow-soft overflow-hidden">
+          <div class="absolute inset-0 pointer-events-none">
+            <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata">
+              <source src="/static/hero.webm" type="video/webm" />
+              <source src="/static/hero.mp4" type="video/mp4" />
+            </video>
+            <div class="absolute inset-0 bg-black/40"></div>
+            <div class="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-white/5 blur-3xl"></div>
+            <div class="absolute -bottom-36 -right-28 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(900px_circle_at_0%_0%,rgba(255,255,255,0.10),transparent_45%),radial-gradient(700px_circle_at_100%_20%,rgba(16,185,129,0.10),transparent_45%)]"></div>
+          </div>
+
+          <div class="relative px-6 sm:px-10 py-10 sm:py-14">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+              <div class="lg:col-span-7">
+                <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                  Daily refresh · Source: Encar
+                </div>
+                <h1 class="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">
+                  Премиальные авто из Encar
+                </h1>
+                <p class="mt-4 text-zinc-200/80 leading-relaxed max-w-xl">
+                  Быстрый каталог с фильтрами, сортировкой и ссылками на оригинальные объявления. Данные сохраняются в SQLite и обновляются раз в сутки.
+                </p>
+                <div class="mt-7 flex flex-col sm:flex-row gap-3">
+                  <a
+                    id="scrollToCars"
+                    href="#cars"
+                    class="inline-flex items-center justify-center rounded-xl bg-white text-zinc-950 px-5 py-3 text-sm font-semibold hover:bg-zinc-200 transition shadow-soft"
+                  >
+                    Смотреть каталог
+                  </a>
+                  <button
+                    class="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-zinc-100 hover:bg-white/10 transition"
+                    type="button"
+                    onclick="updateCars()"
+                  >
+                    Обновить сейчас
+                  </button>
+                  <a
+                    class="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/0 px-5 py-3 text-sm font-semibold text-zinc-200 hover:bg-white/5 transition"
+                    href="/api/cars"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    API JSON
+                  </a>
+                </div>
+              </div>
+              <div class="lg:col-span-5">
+                <div class="rounded-3xl border border-white/10 bg-black/20 p-6">
+                  <div class="text-sm text-zinc-300">Обзор</div>
+                  <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <div class="text-xs text-zinc-400">Cars</div>
+                      <div class="mt-1 text-2xl font-semibold tracking-tight">{{ cars|length }}</div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <div class="text-xs text-zinc-400">Update</div>
+                      <div class="mt-1 text-sm font-semibold text-zinc-100">
+                        {% if last_updated_at %}{{ last_updated_at.strftime('%Y-%m-%d %H:%M UTC') }}{% else %}—{% endif %}
+                      </div>
+                    </div>
+                    <div class="rounded-2xl border border-white/10 bg-white/5 p-4 col-span-2">
+                      <div class="text-xs text-zinc-400">Tips</div>
+                      <div class="mt-1 text-sm text-zinc-200/80">Фильтры работают мгновенно. Для изменения списка нажми Update Cars.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+          <div class="px-6 sm:px-10 py-6 flex items-center justify-between text-sm text-zinc-300">
+            <div>
+              Cars in database: <span class="font-semibold text-zinc-100">{{ cars|length }}</span>
+            </div>
+            <div class="hidden sm:block">
+              Grid: mobile 1 / tablet 2 / desktop 3–4
+            </div>
+            <div class="hidden lg:block">
+              Last update:
+              <span class="font-semibold text-zinc-100">
+                {% if last_updated_at %}{{ last_updated_at.strftime('%Y-%m-%d %H:%M UTC') }}{% else %}—{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-6">
+        <div id="filters" data-collapsed="1" class="rounded-3xl border border-white/10 bg-white/5 shadow-soft overflow-visible">
+          <div class="px-6 sm:px-10 py-8">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-semibold tracking-tight">Найдите автомобиль мечты</h2>
+                <p class="mt-2 text-sm text-zinc-300">Фильтры работают мгновенно по уже загруженному списку.</p>
+              </div>
+              <div class="text-sm text-zinc-300">Показано: <span id="visibleCount" class="font-semibold text-zinc-100">0</span></div>
+            </div>
+
+            <div class="mt-4 sm:hidden">
+              <button
+                id="filtersToggleBtn"
+                type="button"
+                aria-expanded="false"
+                class="w-full inline-flex items-center justify-between rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-sm font-semibold text-zinc-100 hover:bg-white/10 transition"
+              >
+                <span id="filtersToggleLabel">Показать фильтры</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+              </button>
+            </div>
+
+            <div class="filters-body">
+              <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+              <div class="lg:col-span-2">
+                <input
+                  id="q"
+                  type="text"
+                  placeholder="Поиск (например: BMW 3)"
+                  class="filter-control"
+                />
+              </div>
+
+              <div class="select-wrap" data-select-id="make" data-open="0">
+                <select id="make" class="sr-only"></select>
+                <button type="button" class="filter-control select-btn" data-select-btn>
+                  <span class="truncate" data-select-value>Марка</span>
+                  <svg class="chev" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+                </button>
+                <div class="select-menu">
+                  <div class="select-list" data-select-list></div>
+                </div>
+              </div>
+
+              <div class="select-wrap" data-select-id="model" data-open="0">
+                <select id="model" class="sr-only"></select>
+                <button type="button" class="filter-control select-btn" data-select-btn>
+                  <span class="truncate" data-select-value>Модель</span>
+                  <svg class="chev" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+                </button>
+                <div class="select-menu">
+                  <div class="select-list" data-select-list></div>
+                </div>
+              </div>
+
+              <div class="select-wrap" data-select-id="yearFrom" data-open="0">
+                <select id="yearFrom" class="sr-only"></select>
+                <button type="button" class="filter-control select-btn" data-select-btn>
+                  <span class="truncate" data-select-value>Год от</span>
+                  <svg class="chev" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+                </button>
+                <div class="select-menu">
+                  <div class="select-list" data-select-list></div>
+                </div>
+              </div>
+
+              <div class="select-wrap" data-select-id="yearTo" data-open="0">
+                <select id="yearTo" class="sr-only"></select>
+                <button type="button" class="filter-control select-btn" data-select-btn>
+                  <span class="truncate" data-select-value>Год до</span>
+                  <svg class="chev" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+                </button>
+                <div class="select-menu">
+                  <div class="select-list" data-select-list></div>
+                </div>
+              </div>
+
+              <input
+                id="priceFrom"
+                type="number"
+                inputmode="numeric"
+                placeholder="Цена от (₩)"
+                class="filter-control"
+              />
+              <input
+                id="priceTo"
+                type="number"
+                inputmode="numeric"
+                placeholder="Цена до (₩)"
+                class="filter-control"
+              />
+              <input
+                id="mileageFrom"
+                type="number"
+                inputmode="numeric"
+                placeholder="Пробег от (км)"
+                class="filter-control"
+              />
+              <input
+                id="mileageTo"
+                type="number"
+                inputmode="numeric"
+                placeholder="Пробег до (км)"
+                class="filter-control"
+              />
+
+              <div class="select-wrap" data-select-id="sort" data-open="0">
+                <select id="sort" class="sr-only"></select>
+                <button type="button" class="filter-control select-btn" data-select-btn>
+                  <span class="truncate" data-select-value>Сортировка</span>
+                  <svg class="chev" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path fill="none" stroke="rgba(244,244,245,0.75)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 8l4 4 4-4"/></svg>
+                </button>
+                <div class="select-menu">
+                  <div class="select-list" data-select-list></div>
+                </div>
+              </div>
+
+              <button
+                id="resetBtn"
+                type="button"
+                class="lg:col-span-6 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-sm font-semibold text-zinc-100 hover:bg-white/10 transition"
+              >
+                Сбросить фильтры
+              </button>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      </div>
+    </header>
+
+    <main id="cars" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      <div data-cards-grid="1" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for car in cars %}
+        <article
+          class="group rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition"
+          data-car-card="1"
+          data-make="{{ car.make }}"
+          data-model="{{ car.model }}"
+          data-year="{{ car.year }}"
+          data-mileage="{{ car.mileage }}"
+          data-price="{{ car.price }}"
+        >
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <img
+              src="{{ car.image }}"
+              alt="{{ car.make }} {{ car.model }}"
+              loading="lazy"
+              class="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+            />
+          </div>
+
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-base font-semibold truncate">{{ car.make }} {{ car.model }}</div>
+                <div class="mt-1 text-sm text-zinc-300 whitespace-nowrap">Year {{ car.year }} · {{ "{:,.0f}".format(car.mileage) }} km</div>
+              </div>
+              <div class="text-right">
+                <div class="text-lg font-semibold text-white whitespace-nowrap">₩ {{ "{:,.0f}".format(car.price) }}</div>
+                <div class="text-xs text-zinc-400">Est. price</div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {% if car.source_url %}
+                <a
+                  class="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-zinc-100 hover:bg-white/10 transition text-center"
+                  href="{{ car.source_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open on Encar
+                </a>
+                {% endif %}
+                <button
+                  class="w-full rounded-xl bg-white text-zinc-950 px-4 py-2.5 text-sm font-semibold hover:bg-zinc-200 transition"
+                  type="button"
+                  onclick="showToast('Inquiry: {{ car.make }} {{ car.model }}', 'info')"
+                >
+                  Inquiry
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+
+      <div id="loadMoreWrap" class="mt-8 flex items-center justify-center">
+        <button
+          id="loadMoreBtn"
+          type="button"
+          class="rounded-2xl border border-white/12 bg-white/5 px-6 py-3 text-sm font-semibold text-zinc-100 hover:bg-white/10 transition"
+        >
+          Показать ещё
+        </button>
+      </div>
+
+      <div class="mt-6 text-xs text-zinc-500">
+        API export: <a class="underline hover:text-zinc-300" href="/api/cars" target="_blank" rel="noopener noreferrer">/api/cars</a>
+      </div>
+
+      {% if cars|length == 0 %}
+      <div class="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 text-zinc-300">
+        Database is empty. Click <span class="font-semibold text-zinc-100">Update Cars</span> to fetch listings strictly from Encar.
+        If Encar blocks scraping, the catalog will stay empty (strict mode).
+      </div>
+      {% endif %}
+    </main>
+
+    <footer class="relative mt-10 border-t border-white/10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-5">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/10 grid place-items-center">
+                <span class="text-sm font-semibold tracking-wide">EC</span>
+              </div>
+              <div>
+                <div class="font-semibold tracking-tight text-zinc-100">Encar Premium</div>
+                <div class="text-xs text-zinc-500">Modern catalog UI · FastAPI · SQLite</div>
+              </div>
+            </div>
+            <div class="mt-4 text-sm text-zinc-400 leading-relaxed">
+              Данные берутся строго из Encar и сохраняются локально. Обновление рассчитано на запуск по cron 1 раз в сутки.
+            </div>
+          </div>
+
+          <div class="lg:col-span-3">
+            <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Product</div>
+            <div class="mt-3 flex flex-col gap-2 text-sm">
+              <a class="text-zinc-300 hover:text-white transition" href="#cars">Catalog</a>
+              <a class="text-zinc-300 hover:text-white transition" href="/api/cars" target="_blank" rel="noopener noreferrer">API Export</a>
+              <a class="text-zinc-300 hover:text-white transition" href="https://www.encar.com" target="_blank" rel="noopener noreferrer">Encar</a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4">
+            <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Update</div>
+            <div class="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-zinc-300">
+              <div class="flex items-center justify-between gap-4">
+                <div class="text-zinc-400">Last update</div>
+                <div class="font-semibold text-zinc-100">
+                  {% if last_updated_at %}{{ last_updated_at.strftime('%Y-%m-%d %H:%M UTC') }}{% else %}—{% endif %}
+                </div>
+              </div>
+              <div class="mt-2 text-xs text-zinc-500">Cron endpoint: <span class="text-zinc-300">POST /api/cron/update-cars</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-zinc-500">
+          <div>Built for a test assignment: Encar scraping + daily refresh + landing page.</div>
+          <div class="text-zinc-600">FastAPI · SQLite · Tailwind</div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
